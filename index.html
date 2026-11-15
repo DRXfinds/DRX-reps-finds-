@@ -1,147 +1,510 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mon catalogue</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mon Catalogue</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js"></script>
+<style>
+* { box-sizing: border-box; }
 
-  <style>
-    * { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #101010;
+  color: #f5f1e9;
+  font-family: Arial, sans-serif;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      color: #222;
-    }
+header {
+  min-height: 340px;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background:
+    linear-gradient(#0008,#000b),
+    radial-gradient(ellipse at 30% 20%, #294d65, transparent 55%),
+    radial-gradient(ellipse at 75% 30%, #73502e, transparent 50%),
+    #151515;
+}
 
-    header {
-      background: #171717;
-      color: white;
-      padding: 25px;
-      text-align: center;
-    }
+.topbar {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  right: 22px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
 
-    main {
-      max-width: 1100px;
-      margin: auto;
-      padding: 25px;
-    }
+.logo {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: #e6c36a;
+  color: #171717;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
 
-    #products {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-    }
+header h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(38px, 7vw, 68px);
+  font-weight: normal;
+  font-style: italic;
+  margin: 5px 0 12px;
+}
 
-    .product {
-      background: white;
-      border-radius: 12px;
-      padding: 15px;
-      box-shadow: 0 2px 8px #00000012;
-    }
+header p {
+  color: #c7c0b4;
+  font-size: 14px;
+  max-width: 420px;
+  line-height: 1.6;
+}
 
-    .product img {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
+.header-link {
+  margin-top: 15px;
+  background: #d6ad4c;
+  color: #171717;
+  padding: 13px 22px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: bold;
+}
 
-    .product h2 { font-size: 18px; }
-    .price { font-weight: bold; font-size: 19px; }
+.trustbar {
+  padding: 14px 10px;
+  border-top: 1px solid #292929;
+  border-bottom: 1px solid #292929;
+  text-align: center;
+  color: #b5a98f;
+  font-size: 10px;
+  letter-spacing: 3px;
+}
 
-    .product a {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 10px 15px;
-      background: #222;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-    }
+main {
+  max-width: 1450px;
+  margin: auto;
+  padding: 25px;
+}
 
-    #message { text-align: center; }
-  </style>
+.search {
+  width: 100%;
+  background: #1b1b1b;
+  border: 1px solid #303030;
+  border-radius: 30px;
+  padding: 15px 20px;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  margin-bottom: 20px;
+}
+
+.search:focus { border-color: #c6a04c; }
+
+.categories {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 15px 0 55px;
+}
+
+.category {
+  border: 0;
+  background: transparent;
+  color: #aaa;
+  cursor: pointer;
+  min-width: 65px;
+  font-size: 12px;
+}
+
+.category span {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 9px;
+  border-radius: 50%;
+  background: #242424;
+  border: 1px solid #333;
+  font-size: 24px;
+}
+
+.category.active span {
+  border: 2px solid #d6ad4c;
+  color: #e4c16d;
+}
+
+.category.active { color: white; }
+
+.section-title {
+  margin-bottom: 25px;
+}
+
+.section-title small {
+  color: #d6ad4c;
+  letter-spacing: 3px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.section-title h2 {
+  font-family: Georgia, serif;
+  font-size: 30px;
+  font-weight: normal;
+  margin: 9px 0;
+}
+
+.section-title p {
+  color: #999;
+  font-size: 13px;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.product {
+  background: #1b1b1b;
+  border: 1px solid #292929;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform .2s, border-color .2s;
+}
+
+.product:hover {
+  transform: translateY(-4px);
+  border-color: #9b7b3e;
+}
+
+.product-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  background: #292929;
+}
+
+.product-info { padding: 15px; }
+
+.product-category {
+  color: #d6ad4c;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.product h3 {
+  font-size: 15px;
+  margin: 9px 0;
+  font-weight: 500;
+}
+
+.seller {
+  color: #999;
+  font-size: 12px;
+}
+
+.product-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.price {
+  color: #e5c36f;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.product-link {
+  background: #d6ad4c;
+  color: #151515;
+  padding: 9px 12px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.empty {
+  color: #999;
+  text-align: center;
+  padding: 40px 10px;
+  grid-column: 1 / -1;
+}
+
+footer {
+  border-top: 1px solid #292929;
+  padding: 30px 15px;
+  text-align: center;
+  color: #888;
+  font-size: 12px;
+  margin-top: 60px;
+}
+
+@media (max-width: 900px) {
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 600px) {
+  header {
+    min-height: 280px;
+    padding: 65px 15px 30px;
+  }
+
+  .topbar { top: 12px; left: 12px; right: 12px; }
+
+  main { padding: 16px 12px; }
+
+  .categories {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 5px 0 15px;
+    margin-bottom: 35px;
+  }
+
+  .category { flex: 0 0 68px; }
+
+  .category span {
+    width: 53px;
+    height: 53px;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .product-info { padding: 10px; }
+
+  .product h3 { font-size: 13px; }
+
+  .product-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .product-link {
+    display: block;
+    text-align: center;
+    width: 100%;
+  }
+
+  .section-title h2 { font-size: 25px; }
+}
+</style>
 </head>
 
 <body>
-  <header>
-  <h1>Mon catalogue</h1>
-  <p>Découvre tous nos produits</p>
+
+<header>
+  <div class="topbar">
+    <strong>✦ MON CATALOGUE</strong>
+    <a href="admin.html" style="color:#ddd;text-decoration:none">Administration</a>
+  </div>
+
+  <div class="logo">M</div>
+  <h1>Mon Catalogue</h1>
+  <p>Découvre notre sélection de produits soigneusement choisis.</p>
+  <a href="#produits" class="header-link">DÉCOUVRIR LA COLLECTION</a>
 </header>
 
-<main>
-  <h2>Nos produits</h2>
-  <p id="message">Chargement des produits...</p>
-  <div id="products"></div>
+<div class="trustbar">
+  SÉLECTION • QUALITÉ • NOUVEAUTÉS • COLLECTION
+</div>
+
+<main id="produits">
+
+  <input
+    id="search"
+    class="search"
+    type="search"
+    placeholder="⌕  Rechercher un produit..."
+  >
+
+  <div class="categories" id="categories"></div>
+
+  <div class="section-title">
+    <small>✦ NOTRE SÉLECTION</small>
+    <h2>La collection</h2>
+    <p id="count">Chargement des produits...</p>
+  </div>
+
+  <div class="product-grid" id="products">
+    <div class="empty">Chargement des produits...</div>
+  </div>
+
 </main>
 
+<footer>
+  Mon Catalogue — Tous droits réservés
+</footer>
+
 <script>
-async function loadProducts() {
-  const container = document.getElementById("products");
-  const message = document.getElementById("message");
+const productsContainer = document.getElementById("products");
+const categoriesContainer = document.getElementById("categories");
+const searchInput = document.getElementById("search");
+const count = document.getElementById("count");
 
-  const { data, error } = await supabaseClient
-    .from("produits")
-    .select("*")
-    .order("id", { ascending: false });
+let allProducts = [];
+let selectedCategory = "Tous";
 
-  if (error) {
-    message.textContent = "Erreur de chargement des produits.";
-    return;
-  }
+const icons = ["🛍️", "👕", "👟", "🎒", "⌚", "💍", "🎧", "✨"];
 
-  container.replaceChildren();
+function createCategory(name, index) {
+  const button = document.createElement("button");
+  button.className = "category";
+  if (name === selectedCategory) button.classList.add("active");
 
-  if (!data || data.length === 0) {
-    message.textContent = "Aucun produit pour le moment.";
-    return;
-  }
+  const icon = document.createElement("span");
+  icon.textContent = name === "Tous" ? "▦" : icons[(index - 1) % icons.length];
 
-  message.textContent = "";
+  const label = document.createElement("div");
+  label.textContent = name;
 
-  data.forEach(product => {
-    const card = document.createElement("article");
-    card.className = "product";
+  button.append(icon, label);
 
-    if (product.image_url) {
-      const img = document.createElement("img");
-      img.src = product.image_url;
-      img.alt = product.nom || "Produit";
-      img.loading = "lazy";
-      card.appendChild(img);
-    }
+  button.onclick = () => {
+    selectedCategory = name;
+    renderCategories();
+    renderProducts();
+  };
 
-    const name = document.createElement("h2");
-    name.textContent = product.nom;
-    card.appendChild(name);
+  return button;
+}
 
-    const category = document.createElement("p");
-    category.textContent = product.categorie || "";
-    card.appendChild(category);
+function renderCategories() {
+  categoriesContainer.replaceChildren();
 
-    const price = document.createElement("p");
-    price.className = "price";
-    price.textContent = Number(product.prix).toFixed(2) + " €";
-    card.appendChild(price);
+  const names = ["Tous", ...new Set(
+    allProducts.map(p => p.categorie).filter(Boolean)
+  )];
 
-    if (product.lien_original) {
-      const link = document.createElement("a");
-      link.href = product.lien_original;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = "Voir le produit";
-      card.appendChild(link);
-    }
-
-    container.appendChild(card);
+  names.forEach((name, index) => {
+    categoriesContainer.appendChild(createCategory(name, index));
   });
 }
 
+function makeProductCard(product) {
+  const card = document.createElement("article");
+  card.className = "product";
+
+  const img = document.createElement("img");
+  img.className = "product-image";
+  img.alt = product.nom || "Produit";
+  img.loading = "lazy";
+  img.src = product.image_url || "";
+  img.onerror = () => {
+    img.style.display = "none";
+  };
+
+  const info = document.createElement("div");
+  info.className = "product-info";
+
+  const category = document.createElement("div");
+  category.className = "product-category";
+  category.textContent = product.categorie || "Produit";
+
+  const name = document.createElement("h3");
+  name.textContent = product.nom || "Sans nom";
+
+  const seller = document.createElement("div");
+  seller.className = "seller";
+  seller.textContent = product.vendeur || "";
+
+  const bottom = document.createElement("div");
+  bottom.className = "product-bottom";
+
+  const price = document.createElement("span");
+  price.className = "price";
+  price.textContent = product.prix != null
+    ? Number(product.prix).toFixed(2) + " €"
+    : "";
+
+  const link = document.createElement("a");
+  link.className = "product-link";
+  link.textContent = "Voir le produit";
+  link.href = product.lien_bbdbuy || product.lien_original || "#";
+
+  if (link.href !== "#") {
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+  }
+
+  bottom.append(price, link);
+  info.append(category, name, seller, bottom);
+  card.append(img, info);
+
+  return card;
+}
+
+function renderProducts() {
+  const query = searchInput.value.toLowerCase().trim();
+
+  const filtered = allProducts.filter(product => {
+    const matchesCategory =
+      selectedCategory === "Tous" ||
+      product.categorie === selectedCategory;
+
+    const matchesSearch =
+      (product.nom || "").toLowerCase().includes(query) ||
+      (product.categorie || "").toLowerCase().includes(query);
+
+    return matchesCategory && matchesSearch;
+  });
+
+  productsContainer.replaceChildren();
+  count.textContent = filtered.length + " produit(s)";
+
+  if (!filtered.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "Aucun produit trouvé.";
+    productsContainer.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach(product => {
+    productsContainer.appendChild(makeProductCard(product));
+  });
+}
+
+async function loadProducts() {
+  const { data, error } = await supabaseClient
+    .from("produits")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    productsContainer.textContent =
+      "Impossible de charger les produits. Vérifie la configuration Supabase.";
+    count.textContent = "Erreur de chargement";
+    console.error(error);
+    return;
+  }
+
+  allProducts = data || [];
+  renderCategories();
+  renderProducts();
+}
+
+searchInput.addEventListener("input", renderProducts);
 loadProducts();
 </script>
 
