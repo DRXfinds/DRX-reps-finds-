@@ -307,6 +307,38 @@ footer {
   }
 
   .section-title h2 { font-size: 25px; }
+}.logo-container {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 15px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #d6ad4c;
+  background: #151515;
+  box-shadow: 0 0 20px #d6ad4c44;
+}
+
+.logo-container::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  background-image: url("logo.png");
+  background-size: cover;
+  background-position: center;
+  filter: blur(7px);
+  opacity: 0.65;
+}
+
+.logo-container img {
+  position: relative;
+  z-index: 1;
+  width: 75%;
+  height: 75%;
+  object-fit: contain;
 }
 </style>
 </head>
