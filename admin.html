@@ -1,1 +1,131 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Administration</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 25px;
+      max-width: 600px;
+      margin: auto;
+    }
+    .panel {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+    }
+    input, button {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin: 8px 0;
+    }
+    button {
+      background: #222;
+      color: white;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #adminPanel { display: none; }
+    #message { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Administration</h1>
+
+    <section id="loginPanel">
+      <h2>Connexion</h2>
+      <input id="email" type="email" placeholder="Adresse e-mail">
+      <input id="password" type="password" placeholder="Mot de passe">
+      <button id="loginButton">Se connecter</button>
+    </section>
+
+    <section id="adminPanel">
+      <h2>Ajouter un produit</h2>
+      <form id="productForm">
+        <input name="nom" placeholder="Nom du produit" required>
+        <input name="prix" type="number" step="0.01" min="0" placeholder="Prix" required>
+        <input name="categorie" placeholder="Catégorie" required>
+        <input name="vendeur" placeholder="Vendeur">
+        <input name="image_url" type="url" placeholder="Lien de l'image">
+        <input name="lien_bbdbuy" type="url" placeholder="Lien BBDBuy">
+        <input name="lien_original" type="url" placeholder="Lien original">
+        <button type="submit">Ajouter le produit</button>
+      </form>
+      <button id="logoutButton">Se déconnecter</button>
+    </section>
+
+    <p id="message" role="status"></p>
+  </div>
+
+  <script>
+    const message = document.getElementById("message");
+    const loginPanel = document.getElementById("loginPanel");
+    const adminPanel = document.getElementById("adminPanel");
+
+    async function checkSession() {
+      const { data: { session } } =
+        await supabaseClient.auth.getSession();
+
+      loginPanel.style.display = session ? "none" : "block";
+      adminPanel.style.display = session ? "block" : "none";
+    }
+
+    document.getElementById("loginButton").onclick = async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        message.textContent = "Connexion impossible : " + error.message;
+      } else {
+        message.textContent = "Connexion réussie.";
+        await checkSession();
+      }
+    };
+
+    document.getElementById("productForm").onsubmit = async (event) => {
+      event.preventDefault();
+
+      const form = new FormData(event.target);
+      const product = Object.fromEntries(form.entries());
+      product.prix = Number(product.prix);
+
+      for (const key of ["vendeur", "image_url", "lien_bbdbuy", "lien_original"]) {
+        if (!product[key]) product[key] = null;
+      }
+
+      const { error } = await supabaseClient
+        .from("produits")
+        .insert(product);
+
+      if (error) {
+        message.textContent = "Erreur : " + error.message;
+      } else {
+        message.textContent = "Produit ajouté avec succès !";
+        event.target.reset();
+      }
+    };
+
+    document.getElementById("logoutButton").onclick = async () => {
+      await supabaseClient.auth.signOut();
+      message.textContent = "Déconnexion effectuée.";
+      await checkSession();
+    };
+
+    checkSession();
+  </script>
+</body>
+</html>
